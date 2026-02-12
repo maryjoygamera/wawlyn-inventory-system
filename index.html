@@ -512,6 +512,15 @@
             <button class="btn" onclick="showAddItemModal()">➕ Add New Item</button>
             <button class="btn btn-success" onclick="showAdjustPriceModal()">💵 Adjust Prices</button>
             
+            <div class="form-grid" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label>Filter by Location</label>
+                    <select id="inventoryLocationFilter" onchange="filterInventoryByLocation()">
+                        <option value="">All Locations</option>
+                    </select>
+                </div>
+            </div>
+            
             <input type="text" class="search-box" id="searchInventory" placeholder="🔍 Search by name, variant, or location..." onkeyup="searchInventory()">
 
             <table id="inventoryTable">
@@ -1023,14 +1032,16 @@
             return 'status-out-of-stock';
         }
 
-        function renderInventory() {
+        function renderInventory(filteredItems = null) {
             const tbody = document.getElementById('inventoryBody');
-            if (inventory.length === 0) {
+            const itemsToRender = filteredItems || inventory;
+            
+            if (itemsToRender.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666;">No items in inventory</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = inventory.map(item => {
+            tbody.innerHTML = itemsToRender.map(item => {
                 const status = getStatus(item);
                 return `
                     <tr>
@@ -1049,6 +1060,18 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        function filterInventoryByLocation() {
+            const selectedLocation = document.getElementById('inventoryLocationFilter').value;
+            
+            if (!selectedLocation) {
+                renderInventory();
+                return;
+            }
+            
+            const filtered = inventory.filter(item => item.location === selectedLocation);
+            renderInventory(filtered);
         }
 
         function searchInventory() {
@@ -1419,14 +1442,13 @@
             ).join('');
             transferItemSelect.innerHTML = '<option value="">Choose item...</option>' + transferOptions;
 
-            // Update location selects
-            const predefinedLocations = ['Main Store', 'Branch 1', 'Kariakoo', 'Ubongo', 'Warehouse'];
-            const inventoryLocations = [...new Set(inventory.map(i => i.location))];
-            const allLocations = [...new Set([...predefinedLocations, ...inventoryLocations])];
+            // Update location selects - only use locations from inventory
+            const allLocations = [...new Set(inventory.map(i => i.location))];
             const locationOptions = allLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
             
             document.getElementById('saleLocation').innerHTML = '<option value="">Choose location...</option>' + locationOptions;
             document.getElementById('reportLocation').innerHTML = '<option value="">All Locations</option>' + locationOptions;
+            document.getElementById('inventoryLocationFilter').innerHTML = '<option value="">All Locations</option>' + locationOptions;
         }
 
         function updatePriceAdjustSelect() {
