@@ -2005,4 +2005,57 @@
                 
                 alert(message);
                 console.log('Import complete. Check console for details.');
-                event.target.value
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function exportData() {
+            const data = {
+                inventory: inventory,
+                productCatalog: productCatalog,
+                sales: sales,
+                transfers: transfers,
+                activities: activities,
+                exportDate: new Date().toISOString()
+            };
+
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `WAWLYN-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            alert('Data exported successfully!');
+        }
+
+        function clearAllData() {
+            const confirmText = 'DELETE ALL DATA';
+            const userInput = prompt(`⚠️ WARNING: This will delete ALL inventory, sales, and transfer records!\n\nType "${confirmText}" to confirm:`);
+            
+            if (userInput === confirmText) {
+                inventory = [];
+                productCatalog = [];
+                sales = [];
+                transfers = [];
+                activities = [];
+                saveData();
+                renderInventory();
+                renderSales();
+                renderTransfers();
+                updateDashboard();
+                updateSelects();
+                alert('All data has been cleared!');
+                location.reload();
+            } else if (userInput !== null) {
+                alert('Deletion cancelled - text did not match.');
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            localStorage.setItem('productCatalog', JSON.stringify(productCatalog));
+            localStorage.setItem('sales', JSON.stringify(sales));
+            localStorage.
