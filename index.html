@@ -497,7 +497,7 @@
         </form>
         <p style="margin-top: 20px; color: #666; font-size: 14px;">
             Default credentials:<br>
-            Email: <a href="/cdn-cgi/l/email-protection" class="admin@wawlyn.com" data-cfemail="49282d242027093e283e253027672a2624">[email&#160;protected]</a><br>
+            Email: admin@wawlyn.com<br>
             Password: admin123
         </p>
     </div>
@@ -513,7 +513,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <div class="user-info" id="userInfo">👤 Logged in as: <a href="/cdn-cgi/l/email-protection" class="admin@wawlyn.com" data-cfemail="3b5a5f5652557b4c5a4c57425515585456">[email&#160;protected]</a></div>
+                <div class="user-info" id="userInfo">👤 Logged in as: admin@wawlyn.com</div>
                 <button class="logout-btn" onclick="logout()">🚪 Logout</button>
             </div>
         </div>
@@ -888,7 +888,8 @@
         </div>
     </div>
 
-        // Data storage - using a product catalog to track unique items
+    <script>
+        // Data storage
         let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
         let productCatalog = JSON.parse(localStorage.getItem('productCatalog')) || [];
         let sales = JSON.parse(localStorage.getItem('sales')) || [];
@@ -927,7 +928,7 @@
             if (email === 'admin@wawlyn.com' && password === 'admin123') {
                 localStorage.setItem('currentUser', email);
                 currentUser = email;
-                addActivity(`User logged in: ${email}`);
+                addActivity('User logged in: ' + email);
                 checkLogin();
             } else {
                 alert('Invalid email or password!');
@@ -936,7 +937,7 @@
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                addActivity(`User logged out: ${currentUser}`);
+                addActivity('User logged out: ' + currentUser);
                 localStorage.removeItem('currentUser');
                 currentUser = null;
                 checkLogin();
@@ -991,7 +992,6 @@
             });
         }
 
-        // Get or create a product in the catalog
         function getOrCreateProduct(name, variant) {
             let product = productCatalog.find(p => p.name === name && p.variant === variant);
             if (!product) {
@@ -1018,10 +1018,7 @@
                 return;
             }
 
-            // Get or create product
             const product = getOrCreateProduct(name, variant);
-
-            // Check if this product already exists in this location
             const existingItem = inventory.find(i => 
                 i.productId === product.productId && i.location === location
             );
@@ -1045,7 +1042,7 @@
 
             inventory.push(item);
             saveData();
-            addActivity(`Added new item: ${item.name} - ${item.variant} at ${item.location}`);
+            addActivity('Added new item: ' + item.name + ' - ' + item.variant + ' at ' + item.location);
             renderInventory();
             updateDashboard();
             updateSelects();
@@ -1068,7 +1065,7 @@
                 const item = inventory.find(i => i.id === id);
                 inventory = inventory.filter(i => i.id !== id);
                 saveData();
-                addActivity(`Deleted item: ${item.name} - ${item.variant}`);
+                addActivity('Deleted item: ' + item.name + ' - ' + item.variant);
                 renderInventory();
                 updateDashboard();
                 updateSelects();
@@ -1098,22 +1095,7 @@
 
             tbody.innerHTML = itemsToRender.map(item => {
                 const status = getStatus(item);
-                return `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${item.variant}</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.minStock}</td>
-                        <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
-                        <td>${item.location}</td>
-                        <td>TZS ${item.price.toLocaleString()}</td>
-                        <td class="date-display">${formatDate(item.dateAdded)}</td>
-                        <td>
-                            <button class="action-btn btn-warning" onclick="editItem(${item.id})" style="background: #ffc107; color: #000;">✏️ Edit</button>
-                            <button class="action-btn btn-danger" onclick="deleteItem(${item.id})">🗑️ Delete</button>
-                        </td>
-                    </tr>
-                `;
+                return '<tr><td>' + item.name + '</td><td>' + item.variant + '</td><td>' + item.quantity + '</td><td>' + item.minStock + '</td><td><span class="status-badge ' + getStatusClass(status) + '">' + status + '</span></td><td>' + item.location + '</td><td>TZS ' + item.price.toLocaleString() + '</td><td class="date-display">' + formatDate(item.dateAdded) + '</td><td><button class="action-btn btn-warning" onclick="editItem(' + item.id + ')" style="background: #ffc107; color: #000;">✏️ Edit</button><button class="action-btn btn-danger" onclick="deleteItem(' + item.id + ')">🗑️ Delete</button></td></tr>';
             }).join('');
         }
 
@@ -1187,22 +1169,22 @@
 
             const total = subtotal - discountAmount;
 
-            document.getElementById('summaryItem').textContent = `${item.name} - ${item.variant}`;
+            document.getElementById('summaryItem').textContent = item.name + ' - ' + item.variant;
             document.getElementById('summaryQuantity').textContent = quantity;
-            document.getElementById('summaryUnitPrice').textContent = `TZS ${item.price.toLocaleString()}`;
-            document.getElementById('summarySubtotal').textContent = `TZS ${subtotal.toLocaleString()}`;
+            document.getElementById('summaryUnitPrice').textContent = 'TZS ' + item.price.toLocaleString();
+            document.getElementById('summarySubtotal').textContent = 'TZS ' + subtotal.toLocaleString();
             
             if (discountAmount > 0) {
                 document.getElementById('discountRow').style.display = 'flex';
                 const discountText = discountType === 'percent' 
-                    ? `-TZS ${discountAmount.toLocaleString()} (${discountValue}%)`
-                    : `-TZS ${discountAmount.toLocaleString()}`;
+                    ? '-TZS ' + discountAmount.toLocaleString() + ' (' + discountValue + '%)'
+                    : '-TZS ' + discountAmount.toLocaleString();
                 document.getElementById('summaryDiscount').textContent = discountText;
             } else {
                 document.getElementById('discountRow').style.display = 'none';
             }
 
-            document.getElementById('summaryTotal').textContent = `TZS ${total.toLocaleString()}`;
+            document.getElementById('summaryTotal').textContent = 'TZS ' + total.toLocaleString();
             document.getElementById('salePriceSummary').style.display = 'block';
         }
 
@@ -1226,7 +1208,7 @@
             }
 
             if (item.quantity < quantity) {
-                alert(`Insufficient stock! Only ${item.quantity} available`);
+                alert('Insufficient stock! Only ' + item.quantity + ' available');
                 return;
             }
 
@@ -1263,9 +1245,9 @@
             saveData();
             
             const discountText = discountAmount > 0 
-                ? ` (Discount: ${discountType === 'percent' ? discountValue + '%' : 'TZS ' + discountAmount})`
+                ? ' (Discount: ' + (discountType === 'percent' ? discountValue + '%' : 'TZS ' + discountAmount) + ')'
                 : '';
-            addActivity(`Sale recorded: ${quantity}x ${item.name} - ${item.variant} at ${location}${discountText}`);
+            addActivity('Sale recorded: ' + quantity + 'x ' + item.name + ' - ' + item.variant + ' at ' + location + discountText);
             
             renderSales();
             renderInventory();
@@ -1291,25 +1273,11 @@
             tbody.innerHTML = salesToRender.slice(-50).reverse().map(sale => {
                 const discountText = sale.discountAmount > 0 
                     ? (sale.discountType === 'percent' 
-                        ? `${sale.discountValue}% (TZS ${sale.discountAmount.toLocaleString()})`
-                        : `TZS ${sale.discountAmount.toLocaleString()}`)
+                        ? sale.discountValue + '% (TZS ' + sale.discountAmount.toLocaleString() + ')'
+                        : 'TZS ' + sale.discountAmount.toLocaleString())
                     : '-';
 
-                return `
-                    <tr>
-                        <td class="date-display">${formatDate(sale.date)}</td>
-                        <td>${sale.name}</td>
-                        <td>${sale.variant}</td>
-                        <td>${sale.quantity}</td>
-                        <td>TZS ${sale.price.toLocaleString()}</td>
-                        <td style="color: ${sale.discountAmount > 0 ? '#28a745' : '#666'};">${discountText}</td>
-                        <td>${sale.location}</td>
-                        <td><strong>TZS ${sale.total.toLocaleString()}</strong></td>
-                        <td>
-                            <button class="action-btn btn-danger" onclick="deleteSale(${sale.id})">🗑️ Delete</button>
-                        </td>
-                    </tr>
-                `;
+                return '<tr><td class="date-display">' + formatDate(sale.date) + '</td><td>' + sale.name + '</td><td>' + sale.variant + '</td><td>' + sale.quantity + '</td><td>TZS ' + sale.price.toLocaleString() + '</td><td style="color: ' + (sale.discountAmount > 0 ? '#28a745' : '#666') + ';">' + discountText + '</td><td>' + sale.location + '</td><td><strong>TZS ' + sale.total.toLocaleString() + '</strong></td><td><button class="action-btn btn-danger" onclick="deleteSale(' + sale.id + ')">🗑️ Delete</button></td></tr>';
             }).join('');
         }
 
@@ -1324,7 +1292,7 @@
                     
                     sales = sales.filter(s => s.id !== id);
                     saveData();
-                    addActivity(`Deleted sale: ${sale.quantity}x ${sale.name} - ${sale.variant}`);
+                    addActivity('Deleted sale: ' + sale.quantity + 'x ' + sale.name + ' - ' + sale.variant);
                     renderSales();
                     renderInventory();
                     updateDashboard();
@@ -1332,7 +1300,6 @@
             }
         }
 
-        // Update transfer locations based on selected item
         function updateTransferLocations() {
             const productId = parseInt(document.getElementById('transferItem').value);
             const fromSelect = document.getElementById('transferFrom');
@@ -1344,21 +1311,17 @@
                 return;
             }
 
-            // Get all locations where this product exists
             const locationsWithStock = inventory
                 .filter(i => i.productId === productId && i.quantity > 0)
                 .map(i => i.location);
             
-            // Get all unique locations
             const allLocations = [...new Set(inventory.map(i => i.location))];
             
-            // Populate FROM dropdown with locations that have stock
             fromSelect.innerHTML = '<option value="">Choose location...</option>' + 
-                locationsWithStock.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+                locationsWithStock.map(loc => '<option value="' + loc + '">' + loc + '</option>').join('');
             
-            // Populate TO dropdown with all locations
             toSelect.innerHTML = '<option value="">Choose location...</option>' + 
-                allLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+                allLocations.map(loc => '<option value="' + loc + '">' + loc + '</option>').join('');
         }
 
         function transferItems() {
@@ -1378,23 +1341,18 @@
                 return;
             }
 
-            // Find the source item
             const fromItem = inventory.find(i => i.productId === productId && i.location === fromLocation);
             if (!fromItem || fromItem.quantity < quantity) {
                 alert('Insufficient stock in source location');
                 return;
             }
 
-            // Deduct from source
             fromItem.quantity -= quantity;
 
-            // Find or create destination item
             let toItem = inventory.find(i => i.productId === productId && i.location === toLocation);
             if (toItem) {
-                // Item exists in destination, just add quantity
                 toItem.quantity += quantity;
             } else {
-                // Item doesn't exist in destination, create new entry
                 toItem = {
                     id: Date.now(),
                     productId: productId,
@@ -1422,7 +1380,7 @@
 
             transfers.push(transfer);
             saveData();
-            addActivity(`Transfer: ${quantity}x ${fromItem.name} from ${fromLocation} to ${toLocation}`);
+            addActivity('Transfer: ' + quantity + 'x ' + fromItem.name + ' from ' + fromLocation + ' to ' + toLocation);
             renderTransfers();
             renderInventory();
             updateDashboard();
@@ -1445,19 +1403,9 @@
                 return;
             }
 
-            tbody.innerHTML = transfersToRender.slice(-50).reverse().map(transfer => `
-                <tr>
-                    <td class="date-display">${formatDate(transfer.date)}</td>
-                    <td>${transfer.name}</td>
-                    <td>${transfer.variant}</td>
-                    <td>${transfer.quantity}</td>
-                    <td>${transfer.from}</td>
-                    <td>${transfer.to}</td>
-                    <td>
-                        <button class="action-btn btn-danger" onclick="deleteTransfer(${transfer.id})">🗑️ Delete</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = transfersToRender.slice(-50).reverse().map(transfer => 
+                '<tr><td class="date-display">' + formatDate(transfer.date) + '</td><td>' + transfer.name + '</td><td>' + transfer.variant + '</td><td>' + transfer.quantity + '</td><td>' + transfer.from + '</td><td>' + transfer.to + '</td><td><button class="action-btn btn-danger" onclick="deleteTransfer(' + transfer.id + ')">🗑️ Delete</button></td></tr>'
+            ).join('');
         }
 
         function deleteTransfer(id) {
@@ -1472,7 +1420,7 @@
                     
                     transfers = transfers.filter(t => t.id !== id);
                     saveData();
-                    addActivity(`Deleted transfer: ${transfer.quantity}x ${transfer.name} from ${transfer.from} to ${transfer.to}`);
+                    addActivity('Deleted transfer: ' + transfer.quantity + 'x ' + transfer.name + ' from ' + transfer.from + ' to ' + transfer.to);
                     renderTransfers();
                     renderInventory();
                     updateDashboard();
@@ -1481,24 +1429,21 @@
         }
 
         function updateSelects() {
-            // Update sale item select - show all items
             const saleItemSelect = document.getElementById('saleItem');
             const itemOptions = inventory.map(item => 
-                `<option value="${item.id}">${item.name} - ${item.variant} (${item.location})</option>`
+                '<option value="' + item.id + '">' + item.name + ' - ' + item.variant + ' (' + item.location + ')</option>'
             ).join('');
             saleItemSelect.innerHTML = '<option value="">Choose item...</option>' + itemOptions;
 
-            // Update transfer item select - group by product (unique name+variant combinations)
             const transferItemSelect = document.getElementById('transferItem');
             const uniqueProducts = [...new Map(productCatalog.map(p => [p.productId, p])).values()];
             const transferOptions = uniqueProducts.map(product => 
-                `<option value="${product.productId}">${product.name} - ${product.variant}</option>`
+                '<option value="' + product.productId + '">' + product.name + ' - ' + product.variant + '</option>'
             ).join('');
             transferItemSelect.innerHTML = '<option value="">Choose item...</option>' + transferOptions;
 
-            // Update location selects - only use locations from inventory
             const allLocations = [...new Set(inventory.map(i => i.location))];
-            const locationOptions = allLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+            const locationOptions = allLocations.map(loc => '<option value="' + loc + '">' + loc + '</option>').join('');
             
             document.getElementById('saleLocation').innerHTML = '<option value="">Choose location...</option>' + locationOptions;
             document.getElementById('reportLocation').innerHTML = '<option value="">All Locations</option>' + locationOptions;
@@ -1508,7 +1453,7 @@
         function updatePriceAdjustSelect() {
             const select = document.getElementById('priceAdjustItem');
             const options = inventory.map(item => 
-                `<option value="${item.id}">${item.name} - ${item.variant} (${item.location}) - Current: TZS ${item.price}</option>`
+                '<option value="' + item.id + '">' + item.name + ' - ' + item.variant + ' (' + item.location + ') - Current: TZS ' + item.price + '</option>'
             ).join('');
             select.innerHTML = '<option value="">Choose item...</option>' + options;
         }
@@ -1526,7 +1471,7 @@
             if (item) {
                 const oldPrice = item.price;
                 item.price = newPrice;
-                addActivity(`Price adjusted for ${item.name} - ${item.variant} at ${item.location}: TZS ${oldPrice} → TZS ${newPrice}`);
+                addActivity('Price adjusted for ' + item.name + ' - ' + item.variant + ' at ' + item.location + ': TZS ' + oldPrice + ' → TZS ' + newPrice);
                 saveData();
                 renderInventory();
                 updateDashboard();
@@ -1556,7 +1501,7 @@
             
             if (!item) return;
 
-            const oldData = `${item.name} - ${item.variant}`;
+            const oldData = item.name + ' - ' + item.variant;
             
             item.name = document.getElementById('editItemName').value;
             item.variant = document.getElementById('editItemVariant').value;
@@ -1571,7 +1516,7 @@
             }
 
             saveData();
-            addActivity(`Updated item: ${oldData} → ${item.name} - ${item.variant}`);
+            addActivity('Updated item: ' + oldData + ' → ' + item.name + ' - ' + item.variant);
             renderInventory();
             updateDashboard();
             closeModal('editItemModal');
@@ -1579,13 +1524,11 @@
         }
 
         function updateDashboard() {
-            // Overall stats
             document.getElementById('totalItems').textContent = inventory.length;
             document.getElementById('totalStock').textContent = inventory.reduce((sum, item) => sum + item.quantity, 0);
             document.getElementById('lowStockItems').textContent = inventory.filter(item => item.quantity <= item.minStock).length;
             document.getElementById('totalValue').textContent = 'TZS ' + inventory.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString();
 
-            // Location breakdown
             const locations = [...new Set(inventory.map(i => i.location))];
             const locationCardsDiv = document.getElementById('locationCards');
             
@@ -1599,48 +1542,22 @@
                     const lowStock = locationItems.filter(item => item.quantity <= item.minStock).length;
                     const totalValue = locationItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
                     
-                    return `
-                        <div class="location-card">
-                            <h4>📍 ${location}</h4>
-                            <div class="location-stats">
-                                <div class="location-stat">
-                                    <label>Items</label>
-                                    <div class="stat-value">${totalItems}</div>
-                                </div>
-                                <div class="location-stat">
-                                    <label>Total Stock</label>
-                                    <div class="stat-value">${totalStock}</div>
-                                </div>
-                                <div class="location-stat">
-                                    <label>Low Stock</label>
-                                    <div class="stat-value" style="color: ${lowStock > 0 ? '#dc3545' : '#28a745'};">${lowStock}</div>
-                                </div>
-                                <div class="location-stat">
-                                    <label>Value</label>
-                                    <div class="stat-value">TZS ${totalValue.toLocaleString()}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    return '<div class="location-card"><h4>📍 ' + location + '</h4><div class="location-stats"><div class="location-stat"><label>Items</label><div class="stat-value">' + totalItems + '</div></div><div class="location-stat"><label>Total Stock</label><div class="stat-value">' + totalStock + '</div></div><div class="location-stat"><label>Low Stock</label><div class="stat-value" style="color: ' + (lowStock > 0 ? '#dc3545' : '#28a745') + ';">' + lowStock + '</div></div><div class="location-stat"><label>Value</label><div class="stat-value">TZS ' + totalValue.toLocaleString() + '</div></div></div></div>';
                 }).join('');
             }
 
-            // Recent activities
             const activitiesDiv = document.getElementById('recentActivities');
             if (activities.length === 0) {
                 activitiesDiv.innerHTML = '<p style="color: #666;">No recent activities</p>';
             } else {
                 activitiesDiv.innerHTML = activities.slice(-10).reverse().map(activity => 
-                    `<div style="padding: 10px; border-left: 3px solid #667eea; margin-bottom: 10px; background: #f8f9fa;">
-                        <small style="color: #666;">${formatDate(activity.date)}</small><br>
-                        ${activity.text}
-                    </div>`
+                    '<div style="padding: 10px; border-left: 3px solid #667eea; margin-bottom: 10px; background: #f8f9fa;"><small style="color: #666;">' + formatDate(activity.date) + '</small><br>' + activity.text + '</div>'
                 ).join('');
             }
         }
 
         function addActivity(text) {
-            activities.push({ text, date: new Date().toISOString() });
+            activities.push({ text: text, date: new Date().toISOString() });
             if (activities.length > 100) activities = activities.slice(-100);
             saveData();
             updateDashboard();
@@ -1670,103 +1587,18 @@
             const reportTitle = reportDate ? new Date(reportDate).toLocaleDateString() : 'All Time';
             const locationTitle = reportLocation || 'All Locations';
 
-            // Filter inventory for low stock alerts
             let lowStockInventory = inventory.filter(item => item.quantity <= item.minStock);
             if (reportLocation) {
                 lowStockInventory = lowStockInventory.filter(i => i.location === reportLocation);
             }
 
-            const report = `
-                <div style="padding: 30px; background: white;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <img src="logo.jpg" alt="WAWLYN Logo" style="max-width: 200px; margin-bottom: 20px;">
-                        <h1 style="color: #667eea;">WAWLYN Limited</h1>
-                        <h2>End of Day Report</h2>
-                        <p><strong>Date:</strong> ${reportTitle}</p>
-                        <p><strong>Location:</strong> ${locationTitle}</p>
-                        <p><strong>Generated:</strong> ${formatDate(new Date().toISOString())}</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3>Sales Summary</h3>
-                        <table style="width: 100%; border: 1px solid #ddd;">
-                            <tr><td style="padding: 10px;"><strong>Total Sales:</strong></td><td style="padding: 10px;">${filteredSales.length}</td></tr>
-                            <tr><td style="padding: 10px;"><strong>Items Sold:</strong></td><td style="padding: 10px;">${totalItemsSold}</td></tr>
-                            <tr><td style="padding: 10px;"><strong>Gross Revenue:</strong></td><td style="padding: 10px;">TZS ${grossRevenue.toLocaleString()}</td></tr>
-                            <tr><td style="padding: 10px;"><strong>Total Discounts:</strong></td><td style="padding: 10px; color: #28a745;">-TZS ${totalDiscount.toLocaleString()}</td></tr>
-                            <tr style="background: #f8f9fa;"><td style="padding: 10px;"><strong>Net Revenue:</strong></td><td style="padding: 10px;"><strong>TZS ${totalRevenue.toLocaleString()}</strong></td></tr>
-                        </table>
-                    </div>
-
-                    ${filteredSales.length > 0 ? `
-                    <div style="margin-bottom: 30px;">
-                        <h3>Detailed Sales</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #667eea; color: white;">
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Date</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Item</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Qty</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Price</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Subtotal</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Discount</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Total</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Location</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${filteredSales.map(sale => {
-                                    const discountText = sale.discountAmount > 0 
-                                        ? `-TZS ${sale.discountAmount.toLocaleString()}`
-                                        : '-';
-                                    return `
-                                        <tr>
-                                            <td style="padding: 10px; border: 1px solid #ddd;">${formatDate(sale.date)}</td>
-                                            <td style="padding: 10px; border: 1px solid #ddd;">${sale.name} - ${sale.variant}</td>
-                                            <td style="padding: 10px; border: 1px solid #ddd;">${sale.quantity}</td>
-                                            <td style="padding: 10px; border: 1px solid #ddd;">TZS ${sale.price.toLocaleString()}</td>
-                                            <td style="padding: 10px; border: 1px solid #ddd;">TZS ${(sale.subtotal || sale.total).toLocaleString()}</td>
-                                            <td style="padding: 10px; border: 1px solid #ddd; color: #28a745;">${discountText}</td>
-                                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>TZS ${sale.total.toLocaleString()}</strong></td>
-                                            <td style="padding: 10px; border: 1px solid #ddd;">${sale.location}</td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    ` : '<p style="text-align: center; color: #666;">No sales for this period/location</p>'}
-
-                    ${lowStockInventory.length > 0 ? `
-                    <div style="margin-bottom: 30px;">
-                        <h3>Low Stock Alerts</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #ffc107;">
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Item</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Current Stock</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Min Stock</th>
-                                    <th style="padding: 10px; border: 1px solid #ddd;">Location</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${lowStockInventory.map(item => `
-                                    <tr>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${item.name} - ${item.variant}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${item.quantity}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${item.minStock}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${item.location}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
+            const report = '<div style="padding: 30px; background: white;"><div style="text-align: center; margin-bottom: 30px;"><img src="logo.jpg" alt="WAWLYN Logo" style="max-width: 200px; margin-bottom: 20px;"><h1 style="color: #667eea;">WAWLYN Limited</h1><h2>End of Day Report</h2><p><strong>Date:</strong> ' + reportTitle + '</p><p><strong>Location:</strong> ' + locationTitle + '</p><p><strong>Generated:</strong> ' + formatDate(new Date().toISOString()) + '</p></div><div style="margin-bottom: 30px;"><h3>Sales Summary</h3><table style="width: 100%; border: 1px solid #ddd;"><tr><td style="padding: 10px;"><strong>Total Sales:</strong></td><td style="padding: 10px;">' + filteredSales.length + '</td></tr><tr><td style="padding: 10px;"><strong>Items Sold:</strong></td><td style="padding: 10px;">' + totalItemsSold + '</td></tr><tr><td style="padding: 10px;"><strong>Gross Revenue:</strong></td><td style="padding: 10px;">TZS ' + grossRevenue.toLocaleString() + '</td></tr><tr><td style="padding: 10px;"><strong>Total Discounts:</strong></td><td style="padding: 10px; color: #28a745;">-TZS ' + totalDiscount.toLocaleString() + '</td></tr><tr style="background: #f8f9fa;"><td style="padding: 10px;"><strong>Net Revenue:</strong></td><td style="padding: 10px;"><strong>TZS ' + totalRevenue.toLocaleString() + '</strong></td></tr></table></div>' + (filteredSales.length > 0 ? '<div style="margin-bottom: 30px;"><h3>Detailed Sales</h3><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #667eea; color: white;"><th style="padding: 10px; border: 1px solid #ddd;">Date</th><th style="padding: 10px; border: 1px solid #ddd;">Item</th><th style="padding: 10px; border: 1px solid #ddd;">Qty</th><th style="padding: 10px; border: 1px solid #ddd;">Price</th><th style="padding: 10px; border: 1px solid #ddd;">Subtotal</th><th style="padding: 10px; border: 1px solid #ddd;">Discount</th><th style="padding: 10px; border: 1px solid #ddd;">Total</th><th style="padding: 10px; border: 1px solid #ddd;">Location</th></tr></thead><tbody>' + filteredSales.map(sale => {
+                const discountText = sale.discountAmount > 0 ? '-TZS ' + sale.discountAmount.toLocaleString() : '-';
+                return '<tr><td style="padding: 10px; border: 1px solid #ddd;">' + formatDate(sale.date) + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + sale.name + ' - ' + sale.variant + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + sale.quantity + '</td><td style="padding: 10px; border: 1px solid #ddd;">TZS ' + sale.price.toLocaleString() + '</td><td style="padding: 10px; border: 1px solid #ddd;">TZS ' + (sale.subtotal || sale.total).toLocaleString() + '</td><td style="padding: 10px; border: 1px solid #ddd; color: #28a745;">' + discountText + '</td><td style="padding: 10px; border: 1px solid #ddd;"><strong>TZS ' + sale.total.toLocaleString() + '</strong></td><td style="padding: 10px; border: 1px solid #ddd;">' + sale.location + '</td></tr>';
+            }).join('') + '</tbody></table></div>' : '<p style="text-align: center; color: #666;">No sales for this period/location</p>') + (lowStockInventory.length > 0 ? '<div style="margin-bottom: 30px;"><h3>Low Stock Alerts</h3><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #ffc107;"><th style="padding: 10px; border: 1px solid #ddd;">Item</th><th style="padding: 10px; border: 1px solid #ddd;">Current Stock</th><th style="padding: 10px; border: 1px solid #ddd;">Min Stock</th><th style="padding: 10px; border: 1px solid #ddd;">Location</th></tr></thead><tbody>' + lowStockInventory.map(item => '<tr><td style="padding: 10px; border: 1px solid #ddd;">' + item.name + ' - ' + item.variant + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.quantity + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.minStock + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.location + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</div>';
 
             document.getElementById('reportContainer').innerHTML = report;
-            setTimeout(() => window.print(), 500);
+            setTimeout(function() { window.print(); }, 500);
         }
 
         function generateInventoryReport() {
@@ -1779,55 +1611,10 @@
 
             const locationTitle = reportLocation || 'All Locations';
 
-            const report = `
-                <div style="padding: 30px; background: white;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <img src="logo.jpg" alt="WAWLYN Logo" style="max-width: 200px; margin-bottom: 20px;">
-                        <h1 style="color: #667eea;">WAWLYN Limited</h1>
-                        <h2>Full Inventory Report</h2>
-                        <p><strong>Location:</strong> ${locationTitle}</p>
-                        <p><strong>Generated:</strong> ${formatDate(new Date().toISOString())}</p>
-                    </div>
-
-                    ${filteredInventory.length > 0 ? `
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #667eea; color: white;">
-                                <th style="padding: 10px; border: 1px solid #ddd;">Name</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Variant</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Quantity</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Min Stock</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Location</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Price</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Value</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Date Added</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filteredInventory.map(item => `
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${item.name}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${item.variant}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${item.quantity}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${item.minStock}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${item.location}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">TZS ${item.price.toLocaleString()}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">TZS ${(item.quantity * item.price).toLocaleString()}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${formatDate(item.dateAdded)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-
-                    <div style="margin-top: 30px; text-align: right;">
-                        <h3>Total Inventory Value: TZS ${filteredInventory.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString()}</h3>
-                    </div>
-                    ` : '<p style="text-align: center; color: #666;">No inventory items for this location</p>'}
-                </div>
-            `;
+            const report = '<div style="padding: 30px; background: white;"><div style="text-align: center; margin-bottom: 30px;"><img src="logo.jpg" alt="WAWLYN Logo" style="max-width: 200px; margin-bottom: 20px;"><h1 style="color: #667eea;">WAWLYN Limited</h1><h2>Full Inventory Report</h2><p><strong>Location:</strong> ' + locationTitle + '</p><p><strong>Generated:</strong> ' + formatDate(new Date().toISOString()) + '</p></div>' + (filteredInventory.length > 0 ? '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #667eea; color: white;"><th style="padding: 10px; border: 1px solid #ddd;">Name</th><th style="padding: 10px; border: 1px solid #ddd;">Variant</th><th style="padding: 10px; border: 1px solid #ddd;">Quantity</th><th style="padding: 10px; border: 1px solid #ddd;">Min Stock</th><th style="padding: 10px; border: 1px solid #ddd;">Location</th><th style="padding: 10px; border: 1px solid #ddd;">Price</th><th style="padding: 10px; border: 1px solid #ddd;">Value</th><th style="padding: 10px; border: 1px solid #ddd;">Date Added</th></tr></thead><tbody>' + filteredInventory.map(item => '<tr><td style="padding: 10px; border: 1px solid #ddd;">' + item.name + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.variant + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.quantity + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.minStock + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + item.location + '</td><td style="padding: 10px; border: 1px solid #ddd;">TZS ' + item.price.toLocaleString() + '</td><td style="padding: 10px; border: 1px solid #ddd;">TZS ' + (item.quantity * item.price).toLocaleString() + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + formatDate(item.dateAdded) + '</td></tr>').join('') + '</tbody></table><div style="margin-top: 30px; text-align: right;"><h3>Total Inventory Value: TZS ' + filteredInventory.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString() + '</h3></div>' : '<p style="text-align: center; color: #666;">No inventory items for this location</p>') + '</div>';
 
             document.getElementById('reportContainer').innerHTML = report;
-            setTimeout(() => window.print(), 500);
+            setTimeout(function() { window.print(); }, 500);
         }
 
         function generateSalesReport() {
@@ -1850,50 +1637,10 @@
             const reportTitle = reportDate ? new Date(reportDate).toLocaleDateString() : 'All Time';
             const locationTitle = reportLocation || 'All Locations';
 
-            const report = `
-                <div style="padding: 30px; background: white;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <img src="logo.jpg" alt="WAWLYN Logo" style="max-width: 200px; margin-bottom: 20px;">
-                        <h1 style="color: #667eea;">WAWLYN Limited</h1>
-                        <h2>Sales Report</h2>
-                        <p><strong>Period:</strong> ${reportTitle}</p>
-                        <p><strong>Location:</strong> ${locationTitle}</p>
-                        <p><strong>Generated:</strong> ${formatDate(new Date().toISOString())}</p>
-                    </div>
-
-                    ${filteredSales.length > 0 ? `
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #667eea; color: white;">
-                                <th style="padding: 10px; border: 1px solid #ddd;">Date</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Item</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Quantity</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Total</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">Location</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filteredSales.map(sale => `
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${formatDate(sale.date)}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${sale.name} - ${sale.variant}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${sale.quantity}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">TZS ${sale.total.toLocaleString()}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${sale.location}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-
-                    <div style="margin-top: 30px; text-align: right;">
-                        <h3>Total Revenue: TZS ${totalRevenue.toLocaleString()}</h3>
-                    </div>
-                    ` : '<p style="text-align: center; color: #666;">No sales for this period/location</p>'}
-                </div>
-            `;
+            const report = '<div style="padding: 30px; background: white;"><div style="text-align: center; margin-bottom: 30px;"><img src="logo.jpg" alt="WAWLYN Logo" style="max-width: 200px; margin-bottom: 20px;"><h1 style="color: #667eea;">WAWLYN Limited</h1><h2>Sales Report</h2><p><strong>Period:</strong> ' + reportTitle + '</p><p><strong>Location:</strong> ' + locationTitle + '</p><p><strong>Generated:</strong> ' + formatDate(new Date().toISOString()) + '</p></div>' + (filteredSales.length > 0 ? '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #667eea; color: white;"><th style="padding: 10px; border: 1px solid #ddd;">Date</th><th style="padding: 10px; border: 1px solid #ddd;">Item</th><th style="padding: 10px; border: 1px solid #ddd;">Quantity</th><th style="padding: 10px; border: 1px solid #ddd;">Total</th><th style="padding: 10px; border: 1px solid #ddd;">Location</th></tr></thead><tbody>' + filteredSales.map(sale => '<tr><td style="padding: 10px; border: 1px solid #ddd;">' + formatDate(sale.date) + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + sale.name + ' - ' + sale.variant + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + sale.quantity + '</td><td style="padding: 10px; border: 1px solid #ddd;">TZS ' + sale.total.toLocaleString() + '</td><td style="padding: 10px; border: 1px solid #ddd;">' + sale.location + '</td></tr>').join('') + '</tbody></table><div style="margin-top: 30px; text-align: right;"><h3>Total Revenue: TZS ' + totalRevenue.toLocaleString() + '</h3></div>' : '<p style="text-align: center; color: #666;">No sales for this period/location</p>') + '</div>';
 
             document.getElementById('reportContainer').innerHTML = report;
-            setTimeout(() => window.print(), 500);
+            setTimeout(function() { window.print(); }, 500);
         }
 
         function downloadTemplate() {
@@ -1918,56 +1665,49 @@
                 let skipped = 0;
                 let errors = [];
 
-                console.log('Total lines in CSV:', lines.length);
-
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     
-                    // Skip empty lines
                     if (!line) {
-                        console.log(`Line ${i}: Empty, skipping`);
                         continue;
                     }
 
-                    // Split by comma
                     const parts = line.split(',').map(p => p.trim());
-                    
-                    console.log(`Line ${i}:`, parts);
 
-                    // Need at least 7 columns: Name, Variant, Quantity, MinStock, Status, Location, Price
                     if (parts.length < 7) {
-                        errors.push(`Line ${i}: Not enough columns (found ${parts.length}, need 7)`);
+                        errors.push('Line ' + i + ': Not enough columns (found ' + parts.length + ', need 7)');
                         skipped++;
                         continue;
                     }
 
-                    const [name, variant, quantity, minStock, status, location, price] = parts;
+                    const name = parts[0];
+                    const variant = parts[1];
+                    const quantity = parts[2];
+                    const minStock = parts[3];
+                    const status = parts[4];
+                    const location = parts[5];
+                    const price = parts[6];
                     
-                    // Validate required fields
                     if (!name || !variant || !location) {
-                        errors.push(`Line ${i}: Missing required fields (name, variant, or location)`);
+                        errors.push('Line ' + i + ': Missing required fields (name, variant, or location)');
                         skipped++;
                         continue;
                     }
 
                     try {
-                        // Get or create product
                         const product = getOrCreateProduct(name, variant);
                         
-                        // Check if item already exists in this location
                         const existingItem = inventory.find(item => 
                             item.productId === product.productId && item.location === location
                         );
                         
                         if (existingItem) {
-                            console.log(`Line ${i}: Item already exists, skipping`);
                             skipped++;
                             continue;
                         }
 
-                        // Add new item
                         inventory.push({
-                            id: Date.now() + i + Math.random(), // More unique ID
+                            id: Date.now() + i + Math.random(),
                             productId: product.productId,
                             name: name,
                             variant: variant,
@@ -1978,32 +1718,31 @@
                             dateAdded: new Date().toISOString()
                         });
                         imported++;
-                        console.log(`Line ${i}: Successfully imported`);
                     } catch (err) {
-                        errors.push(`Line ${i}: Error - ${err.message}`);
+                        errors.push('Line ' + i + ': Error - ' + err.message);
                         skipped++;
                     }
                 }
 
                 saveData();
-                addActivity(`Imported ${imported} items from CSV (${skipped} skipped)`);
+                addActivity('Imported ' + imported + ' items from CSV (' + skipped + ' skipped)');
                 renderInventory();
                 updateDashboard();
                 updateSelects();
                 
-                // Show detailed results
-                let message = `Import Complete!\n\n`;
-                message += `✅ Successfully imported: ${imported} items\n`;
+                let message = 'Import Complete!\n\n';
+                message += '✅ Successfully imported: ' + imported + ' items\n';
                 if (skipped > 0) {
-                    message += `⚠️ Skipped: ${skipped} items\n\n`;
+                    message += '⚠️ Skipped: ' + skipped + ' items\n\n';
                 }
                 if (errors.length > 0) {
-                    message += `Errors:\n`;
-                    errors.forEach(err => message += `- ${err}\n`);
+                    message += 'Errors:\n';
+                    errors.forEach(function(err) {
+                        message += '- ' + err + '\n';
+                    });
                 }
                 
                 alert(message);
-                console.log('Import complete. Check console for details.');
                 event.target.value = '';
             };
             reader.readAsText(file);
@@ -2024,7 +1763,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `WAWLYN-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = 'WAWLYN-backup-' + new Date().toISOString().split('T')[0] + '.json';
             a.click();
             window.URL.revokeObjectURL(url);
             alert('Data exported successfully!');
@@ -2032,7 +1771,7 @@
 
         function clearAllData() {
             const confirmText = 'DELETE ALL DATA';
-            const userInput = prompt(`⚠️ WARNING: This will delete ALL inventory, sales, and transfer records!\n\nType "${confirmText}" to confirm:`);
+            const userInput = prompt('⚠️ WARNING: This will delete ALL inventory, sales, and transfer records!\n\nType "' + confirmText + '" to confirm:');
             
             if (userInput === confirmText) {
                 inventory = [];
@@ -2057,4 +1796,9 @@
             localStorage.setItem('inventory', JSON.stringify(inventory));
             localStorage.setItem('productCatalog', JSON.stringify(productCatalog));
             localStorage.setItem('sales', JSON.stringify(sales));
-            localStorage.
+            localStorage.setItem('transfers', JSON.stringify(transfers));
+            localStorage.setItem('activities', JSON.stringify(activities));
+        }
+    </script>
+</body>
+</html>
