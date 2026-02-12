@@ -317,6 +317,55 @@
             font-weight: bold;
         }
 
+        .location-breakdown {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .location-breakdown h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .location-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .location-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .location-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .location-stat {
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .location-stat label {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .location-stat .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -500,6 +549,11 @@
                 </div>
             </div>
 
+            <div class="location-breakdown" id="locationBreakdown">
+                <h3>📍 Breakdown by Location</h3>
+                <div id="locationCards"></div>
+            </div>
+
             <h3 style="margin-top: 30px;">Recent Activities</h3>
             <div id="recentActivities" style="margin-top: 15px;">
                 <p style="color: #666;">No recent activities</p>
@@ -613,6 +667,7 @@
             <button class="btn btn-success" onclick="recordSale()" style="margin-top: 15px;">✅ Record Sale</button>
 
             <h3 style="margin-top: 30px;">Sales History</h3>
+            <input type="text" class="search-box" id="searchSales" placeholder="🔍 Search sales by item name, variant, or location..." onkeyup="searchSales()">
             <table>
                 <thead>
                     <tr>
@@ -669,6 +724,7 @@
             <button class="btn btn-warning" onclick="transferItems()">🔄 Transfer Items</button>
 
             <h3 style="margin-top: 30px;">Transfer History</h3>
+            <input type="text" class="search-box" id="searchTransfers" placeholder="🔍 Search transfers by item name, variant, or location..." onkeyup="searchTransfers()">
             <table>
                 <thead>
                     <tr>
@@ -1081,32 +1137,28 @@
                 item.variant.toLowerCase().includes(searchTerm) ||
                 item.location.toLowerCase().includes(searchTerm)
             );
+            renderInventory(filtered);
+        }
 
-            const tbody = document.getElementById('inventoryBody');
-            if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666;">No matching items found</td></tr>';
-                return;
-            }
+        function searchSales() {
+            const searchTerm = document.getElementById('searchSales').value.toLowerCase();
+            const filtered = sales.filter(sale => 
+                sale.name.toLowerCase().includes(searchTerm) ||
+                sale.variant.toLowerCase().includes(searchTerm) ||
+                sale.location.toLowerCase().includes(searchTerm)
+            );
+            renderSales(filtered);
+        }
 
-            tbody.innerHTML = filtered.map(item => {
-                const status = getStatus(item);
-                return `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${item.variant}</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.minStock}</td>
-                        <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
-                        <td>${item.location}</td>
-                        <td>TZS ${item.price.toLocaleString()}</td>
-                        <td class="date-display">${formatDate(item.dateAdded)}</td>
-                        <td>
-                            <button class="action-btn btn-warning" onclick="editItem(${item.id})" style="background: #ffc107; color: #000;">✏️ Edit</button>
-                            <button class="action-btn btn-danger" onclick="deleteItem(${item.id})">🗑️ Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+        function searchTransfers() {
+            const searchTerm = document.getElementById('searchTransfers').value.toLowerCase();
+            const filtered = transfers.filter(transfer => 
+                transfer.name.toLowerCase().includes(searchTerm) ||
+                transfer.variant.toLowerCase().includes(searchTerm) ||
+                transfer.from.toLowerCase().includes(searchTerm) ||
+                transfer.to.toLowerCase().includes(searchTerm)
+            );
+            renderTransfers(filtered);
         }
 
         function calculateSaleTotal() {
@@ -1228,15 +1280,16 @@
             alert('Sale recorded successfully!');
         }
 
-        function renderSales() {
+        function renderSales(filteredSales = null) {
             const tbody = document.getElementById('salesBody');
+            const salesToRender = filteredSales || sales;
 
-            if (sales.length === 0) {
+            if (salesToRender.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666;">No sales recorded</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = sales.slice(-50).reverse().map(sale => {
+            tbody.innerHTML = salesToRender.slice(-50).reverse().map(sale => {
                 const discountText = sale.discountAmount > 0 
                     ? (sale.discountType === 'percent' 
                         ? `${sale.discountValue}% (TZS ${sale.discountAmount.toLocaleString()})`
@@ -1384,14 +1437,16 @@
             alert('Transfer completed successfully!');
         }
 
-        function renderTransfers() {
+        function renderTransfers(filteredTransfers = null) {
             const tbody = document.getElementById('transferBody');
-            if (transfers.length === 0) {
+            const transfersToRender = filteredTransfers || transfers;
+
+            if (transfersToRender.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No transfers recorded</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = transfers.slice(-50).reverse().map(transfer => `
+            tbody.innerHTML = transfersToRender.slice(-50).reverse().map(transfer => `
                 <tr>
                     <td class="date-display">${formatDate(transfer.date)}</td>
                     <td>${transfer.name}</td>
@@ -1475,6 +1530,7 @@
                 addActivity(`Price adjusted for ${item.name} - ${item.variant} at ${item.location}: TZS ${oldPrice} → TZS ${newPrice}`);
                 saveData();
                 renderInventory();
+                updateDashboard();
                 closeModal('adjustPriceModal');
                 alert('Price updated successfully!');
             }
@@ -1518,16 +1574,59 @@
             saveData();
             addActivity(`Updated item: ${oldData} → ${item.name} - ${item.variant}`);
             renderInventory();
+            updateDashboard();
             closeModal('editItemModal');
             alert('Item updated successfully!');
         }
 
         function updateDashboard() {
+            // Overall stats
             document.getElementById('totalItems').textContent = inventory.length;
             document.getElementById('totalStock').textContent = inventory.reduce((sum, item) => sum + item.quantity, 0);
             document.getElementById('lowStockItems').textContent = inventory.filter(item => item.quantity <= item.minStock).length;
             document.getElementById('totalValue').textContent = 'TZS ' + inventory.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString();
 
+            // Location breakdown
+            const locations = [...new Set(inventory.map(i => i.location))];
+            const locationCardsDiv = document.getElementById('locationCards');
+            
+            if (locations.length === 0) {
+                locationCardsDiv.innerHTML = '<p style="color: #666; text-align: center;">No locations yet</p>';
+            } else {
+                locationCardsDiv.innerHTML = locations.map(location => {
+                    const locationItems = inventory.filter(i => i.location === location);
+                    const totalItems = locationItems.length;
+                    const totalStock = locationItems.reduce((sum, item) => sum + item.quantity, 0);
+                    const lowStock = locationItems.filter(item => item.quantity <= item.minStock).length;
+                    const totalValue = locationItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                    
+                    return `
+                        <div class="location-card">
+                            <h4>📍 ${location}</h4>
+                            <div class="location-stats">
+                                <div class="location-stat">
+                                    <label>Items</label>
+                                    <div class="stat-value">${totalItems}</div>
+                                </div>
+                                <div class="location-stat">
+                                    <label>Total Stock</label>
+                                    <div class="stat-value">${totalStock}</div>
+                                </div>
+                                <div class="location-stat">
+                                    <label>Low Stock</label>
+                                    <div class="stat-value" style="color: ${lowStock > 0 ? '#dc3545' : '#28a745'};">${lowStock}</div>
+                                </div>
+                                <div class="location-stat">
+                                    <label>Value</label>
+                                    <div class="stat-value">TZS ${totalValue.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Recent activities
             const activitiesDiv = document.getElementById('recentActivities');
             if (activities.length === 0) {
                 activitiesDiv.innerHTML = '<p style="color: #666;">No recent activities</p>';
